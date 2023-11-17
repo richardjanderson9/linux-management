@@ -46,6 +46,10 @@ setup_user() {
     # Disable password-based authentication
     sudo sed -i "/^$user_name/s/[^:]*:[^:]*:/\*:/2" /etc/shadow
     echo "Disabled password-based authentication for user: $user_name"
+    # Change user password to a random one
+    random_password=$(openssl rand -base64 12)
+    echo -e "$random_password\n$random_password" | sudo passwd $user_name
+    echo "Changed password for user: $user_name"
 }
 
 # Setup managementacc user
@@ -54,12 +58,15 @@ setup_user $managementacc
 # Setup useracc user
 setup_user $useracc
 
-# Disable SSH login for the default user
+# Disable SSH login for the default user and change its password to a random one
 if [ ! -z "$default_user" ]; then
     sudo passwd -l $default_user
     echo "Disabled SSH login for the default user: $default_user"
+    random_password=$(openssl rand -base64 12)
+    echo -e "$random_password\n$random_password" | sudo passwd $default_user
+    echo "Changed password for the default user: $default_user"
 else
     echo "No default user found for this device type."
 fi
 
-echo "User setup, new SSH keys generated, password-based authentication disabled, and default user disabled on $device_type."
+echo "User setup, new SSH keys generated, password-based authentication disabled, and default user disabled and password changed on $device_type."
